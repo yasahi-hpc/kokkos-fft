@@ -78,12 +78,16 @@ inline constexpr bool is_allowed_space_v =
 
 }  // namespace Impl
 
-// Callback types are exposed to users
-template <typename ExecutionSpace, typename T, typename CallBackTag>
-struct CallBackSymbolType {
-  using type =
-      KokkosFFT::Impl::FFTCallBackType<ExecutionSpace, T, CallBackTag>::type;
-};
+/// \brief Deduce the vendor FFT data type (cufftReal, cufftComplex,
+/// hipfftReal, ...) corresponding to a Kokkos-side value type T (float,
+/// double, Kokkos::complex<float>, Kokkos::complex<double>) for
+/// ExecutionSpace. Exposed outside KokkosFFT::Impl so users writing a
+/// callback function can use it directly, e.g. to instantiate a callback
+/// function template with the type the vendor callback symbol actually
+/// expects instead of relying on T happening to be layout-identical to it.
+template <typename T, typename ExecutionSpace = Kokkos::DefaultExecutionSpace>
+using fft_data_type =
+    typename KokkosFFT::Impl::fft_data_type<ExecutionSpace, T>::type;
 
 }  // namespace KokkosFFT
 

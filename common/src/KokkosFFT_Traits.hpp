@@ -330,11 +330,6 @@ template <typename T>
 inline constexpr bool is_std_array_v = is_std_array<T>::value;
 
 }  // namespace Impl
-
-/// \tags for Callback
-struct LoadCallback {};
-struct StoreCallback {};
-
 }  // namespace KokkosFFT
 
 #endif

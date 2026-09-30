@@ -36,8 +36,24 @@ if(NOT KokkosFFT_ENABLE_INTERNAL_KOKKOS)
     find_package(Kokkos ${KOKKOS_REQUIRED_VERSION} REQUIRED)
     # Check the alignment of complex numbers
     kokkos_check(OPTIONS COMPLEX_ALIGN)
+    if(KokkosFFT_ENABLE_CALLBACK)
+      kokkos_check(DEVICES CUDA RETURN_VALUE is_cuda_enabled)
+      if("${is_cuda_enabled}")
+        kokkos_check(OPTIONS CUDA_RELOCATABLE_DEVICE_CODE)
+      endif()
+    endif()
   endif()
 else()
+  # Legacy vendor callbacks (cufftXtSetCallback) resolve a device function
+  # pointer via cudaMemcpyFromSymbol. Without relocatable device code, that
+  # pointer is not valid at the call site inside cuFFT's own kernel, causing
+  # an "Invalid PC" crash at execution time. Force RDC on for CUDA so this
+  # can't be silently misconfigured.
+  if(KokkosFFT_ENABLE_CALLBACK)
+    if(Kokkos_ENABLE_CUDA)
+      set(Kokkos_ENABLE_CUDA_RELOCATABLE_DEVICE_CODE ON)
+    endif()
+  endif()
   add_subdirectory(tpls/kokkos)
 endif()
 
